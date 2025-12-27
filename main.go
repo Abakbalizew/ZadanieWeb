@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"zadanieweb/handlers"
 
@@ -8,11 +9,15 @@ import (
 )
 
 func main() {
+	//Контекст, где мы будем хранить id юзера, если он аутентифицирован
+	ctx := context.Background()
+	//Router чтобы сделать динамические страницы
 	rtr := mux.NewRouter()
 	rtr.HandleFunc("/api", handlers.Handle_api).Methods("GET")
-	rtr.HandleFunc("/api/auth/login", handlers.Handle_login).Methods("GET")
+	rtr.HandleFunc("/api/auth/getlogin", handlers.Handle_getLogin).Methods("GET")
+
+	rtr.HandleFunc("/api/auth/login", handlers.Handle_postLogin(ctx)).Methods("POST")
 
 	http.Handle("/", rtr)
 	http.ListenAndServe(":8080", nil)
-
 }

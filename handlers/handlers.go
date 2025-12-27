@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+//Главная страница
 func Handle_api(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/api.html")
 	if err != nil {
@@ -13,10 +14,13 @@ func Handle_api(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, "api.html")
 }
 
-func Handle_login(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("templates/login.html")
+//Обработчик страницы входа в аккаунт
+func Handle_getLogin(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("templates/getlogin.html")
 	if err != nil {
 		panic(err)
 	}
-	t.Execute(w, "login.html")
+	t.Execute(w, "getlogin.html")
 }
+
+
