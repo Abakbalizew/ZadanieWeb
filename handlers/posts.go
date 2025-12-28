@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"zadanieweb/databases"
+	myerrors "zadanieweb/errors"
 	"zadanieweb/jwttokens"
 
 	"github.com/google/uuid"
@@ -18,8 +19,10 @@ func Handle_postLogin(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if rec := recover(); rec != nil {
-				fmt.Println("Перехвачено исключение:", r)
+				myerrors.Cur_error.ErrMsg = "Неверный логин или пароль! :("
 				http.Redirect(w, r, "/api/auth/getlogin", http.StatusSeeOther)
+
+				fmt.Println("Перехвачено исключение:", r)
 			}
 		}()
 
