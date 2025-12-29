@@ -24,3 +24,12 @@ func Handle_getLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Execute(w, myerrors.Cur_error)
 }
+
+// Обработчик страницы входа в аккаунт
+func Handle_getRegister(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("templates/getregister.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, myerrors.Cur_error)
+}

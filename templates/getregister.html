@@ -23,23 +23,43 @@
       </header>
       <main class="d-flex align-items-center justify-content-center flex-grow-1">
          <div class="w-100" style="max-width: 400px;">
-            <h2 class="mb-4">Вход в учетную запись</h2>
-            <form action="/api/auth/login" method="post" class="d-flex flex-column gap-3">
+            <h2 class="mb-4">Регистрация</h2>
+
+            <!-- Поля для ввода -->
+            <form action="/api/auth/register" method="post" class="d-flex flex-column gap-3">
                <div class="d-flex align-items-center">
-                  <input type="email" class="form-control" name="email" id="email" placeholder="Введите email" required>
+                  <input type="email" class="form-control" name="email" id="email" placeholder="Введите ваш email" required>
                </div>
                <div class="d-flex align-items-center">
-                  <input type="password" class="form-control" name="password" id="password" placeholder="Введите пароль" required>
+                  <input type="password" class="form-control" name="password" id="password" placeholder="Придумайте пароль" required>
                </div>
-               <button type="submit" class="btn btn-lg btn-light fw-bold border-white bg-white w-100 mt-3">Войти</button>
+
+               <!-- Выбор роли -->
+               <div class="d-flex align-items-center gap-2">
+                  <span>Выберите вашу роль:</span>
+                  <div class="form-check form-check-inline" style="margin-right: 10px; margin-left: 10px;">
+                     <input class="form-check-input" type="radio" name="role" id="author" value="Author" checked>
+                     <label class="form-check-label" for="author">Автор</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                     <input class="form-check-input" type="radio" name="role" id="reader" value="Reader">
+                     <label class="form-check-label" for="reader">Читатель</label>
+                  </div>
+               </div>
+
+               <button type="submit" class="btn btn-lg btn-light fw-bold border-white bg-white w-100">Зарегистрироваться</button>
             </form>
+
+            <!-- Вывод ошибки -->
             <p class="mt-3" style="color: rgb(233, 246, 196);">
                {{ if ne .ErrMsg "" }}
                <p>{{ .ErrMsg }}</p>
                {{ end }}
             </p>
+
+            <!-- Переход на регистрацию -->
             <p class="mt-3 text-white-50">
-               Нет аккаунта? <a href="/api/auth/getregister" class="text-white">Зарегистрироваться</a>
+               Есть аккаунт? <a href="register.html" class="text-white">Войти</a>
             </p>
          </div>
       </main>

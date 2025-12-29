@@ -15,8 +15,10 @@ func main() {
 	rtr := mux.NewRouter()
 	rtr.HandleFunc("/api", handlers.Handle_api).Methods("GET")
 	rtr.HandleFunc("/api/auth/getlogin", handlers.Handle_getLogin).Methods("GET")
+	rtr.HandleFunc("/api/auth/getregister", handlers.Handle_getRegister).Methods("GET")
 
 	rtr.HandleFunc("/api/auth/login", handlers.Handle_postLogin(ctx)).Methods("POST")
+	rtr.HandleFunc("/api/auth/register", handlers.Handle_postRegister(ctx)).Methods("POST")
 
 	http.Handle("/", rtr)
 	http.ListenAndServe(":8080", nil)
