@@ -3,14 +3,14 @@ package main
 import (
 	"net/http"
 	"zadanieweb/handlers"
-	"zadanieweb/users"
+	"zadanieweb/models"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
 	//Обнуляем ошибки, чтобы они не выводились на экранах регистрации и входа в аккаунт просто так
-	users.AuthMap[users.AuthKey] = ""
+	models.AuthMap[models.AuthKey] = ""
 
 	//Router чтобы сделать динамические страницы
 	rtr := mux.NewRouter()
@@ -25,7 +25,7 @@ func main() {
 	rtr.HandleFunc("/api/auth/exit", handlers.Handle_exit).Methods("GET")
 
 	//Посты
-	rtr.HandleFunc("/api/posts", )
+	rtr.HandleFunc("/api/posts", handlers.Handle_posts).Methods("GET")
 
 	rtr.HandleFunc("/api/auth/login", handlers.Handle_postLogin).Methods("POST")
 	rtr.HandleFunc("/api/auth/register", handlers.Handle_postRegister).Methods("POST")

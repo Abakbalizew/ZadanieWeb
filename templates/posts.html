@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="height: max-content;">
+<html lang="en" style="max-height: max-content;">
 
 <head>
    <meta charset="UTF-8">
@@ -10,67 +10,114 @@
 </head>
 
 <body class="d-flex h-100 text-center text-bg-dark">
-    
-    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-        
-        <header class="mb-auto">
-            <div>
-                <h3 class="float-md-start mb-0">Zadan1e</h3>
-                <nav class="nav nav-masthead justify-content-center float-md-end"> 
-                    <a class="nav-link fw-bold py-1 px-0" aria-current="page" href="/api">Главная</a> 
-                    <a class="nav-link fw-bold py-1 px-0 active" href="#">Посты</a>  
-                    <a class="nav-link fw-bold py-1 px-0" href="/api/auth/getlogin">Зарег/Войти</a>
-                </nav>
-            </div>
-        </header>
-        
-        <main class="px-3">
-            
-            <h1>Последние посты:</h1>
-            
-            <section class="my-4">
-                <article class="card text-bg-dark border-secondary mb-3">
-                    <div class="card-header"><strong>Заголовок поста №1</strong></div>
-                    <div class="card-body">
-                        <p class="card-text lead">Краткое содержание первого поста. Здесь размещается основной текст поста, который должен заинтересовать читателя и раскрыть суть публикации.</p>
-                    </div>
-                    <div class="card-footer text-muted">Опубликовано: 10 октября 2023 г.</div>
-                </article>
-                
-                <article class="card text-bg-dark border-secondary mb-3">
-                    <div class="card-header"><strong>Заголовок поста №2</strong></div>
-                    <div class="card-body">
-                        <p class="card-text lead">Здесь находится второй пост с другим содержанием. Текст второго поста отличается от предыдущего и раскрывает новую тему или идею.</p>
-                    </div>
-                    <div class="card-footer text-muted">Опубликовано: 12 октября 2023 г.</div>
-                </article>
-                
-                <article class="card text-bg-dark border-secondary mb-3">
-                    <div class="card-header"><strong>Заголовок поста №3</strong></div>
-                    <div class="card-body">
-                        <p class="card-text lead">Третий пост содержит уникальную информацию, отличную от предыдущих публикаций. Это позволяет разнообразить контент и привлечь внимание новых читателей.</p>
-                    </div>
-                    <div class="card-footer text-muted">Опубликовано: 15 октября 2023 г.</div>
-                </article>
 
-                  <article class="card text-bg-dark border-secondary mb-3">
-                    <div class="card-header"><strong>Заголовок поста №3</strong></div>
-                    <div class="card-body">
-                        <p class="card-text lead">Третий пост содержит уникальную информацию, отличную от предыдущих публикаций. Это позволяет разнообразить контент и привлечь внимание новых читателей.</p>
-                    </div>
-                    <div class="card-footer text-muted">Опубликовано: 15 октября 2023 г.</div>
-                </article>
-            </section>
-            
-        </main>
-        
-        <footer class="mt-auto text-white-50">
-            <p>Сайт для задания by <a href="https://vk.com/chel.harosh" class="text-white">@Z4harSapan</a>.</p>
-        </footer>
-        
-    </div>
-    
-    <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" class="astro-vvvwv3sm"></script>
+   <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+
+      <header class="mb-auto">
+         <div>
+            <h3 class="float-md-start mb-0">Zadan1e</h3>
+            <nav class="nav nav-masthead justify-content-center float-md-end">
+               <a class="nav-link fw-bold py-1 px-0" aria-current="page" href="/api">Главная</a>
+               <a class="nav-link fw-bold py-1 px-0 active" href="#">Посты</a>
+               <a class="nav-link fw-bold py-1 px-0" href="/api/auth/getlogin">Зарег/Войти</a>
+            </nav>
+         </div>
+      </header>
+
+      <!-- Пользователь не авторизован -->
+      {{ if not .Email}}
+      <main class="px-3">
+         <h1>Моё zadan1e.</h1>
+         <p class="lead mb-4">
+            Чтобы писать посты или смотреть посты других авторов, нужно
+            авторизоваться! (Это займёт менее 15 секунд)
+         </p>
+         <p class="lead">
+            <a href="/api/auth/getlogin" class="btn btn-lg btn-light fw-bold border-white bg-white"
+               style="width: 120px; white-space: nowrap;">Войти</a>
+         </p>
+      </main>
+      {{ end }}
+
+      <!-- Пользователь - читатель -->
+      {{ if and (.Email) (eq .Role "Reader") }}
+      <main class="px-3">
+         <h1>Последние посты:</h1>
+
+         <section class="my-4">
+            {{ range .Posts }}
+            <article class="card text-bg-dark border-secondary mb-3">
+               <div class="card-header"><strong>{{ .Title }}</strong></div>
+               <div class="card-body">
+                  <p class="card-text lead">{{ .Content }}</p>
+               </div>
+               {{ if not .UpdatedAt }}
+               <div class="card-footer text-muted">Опубликовано: {{ .CreatedAt }} г.</div>
+               {{ else }}
+               <div class="card-footer text-muted">Отредактировано: {{ .UpdatedAt }} г.</div>
+               {{ end }}
+            </article>
+            {{ end }}
+         </section>
+
+      </main>
+
+      {{ end }}
+
+      <!-- Пользователь - автор -->
+      {{ if and (.Email) (eq .Role "Author") }}
+
+      <main class="px-3">
+
+         <h1>Напишите новый пост:</h1>
+
+         <form action="#" method="post" class="row g-3 my-4">
+            <div class="col-md-12">
+               <label for="postTitle" class="form-label">Заголовок поста</label>
+               <input type="text" class="form-control" id="postTitle" placeholder="Введите заголовок поста" required>
+            </div>
+            <div class="col-md-12">
+               <label for="postContent" class="form-label">Содержание поста</label>
+               <textarea class="form-control" id="postContent" rows="4" placeholder="Расскажите свою историю..."
+                  required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Создать пост</button>
+         </form>
+
+         <hr />
+
+         <h2>Ваши опубликованные посты и черновики:</h2>
+
+         <section class="my-4">
+            {{ range .Posts }}
+            <article class="card text-bg-dark border-secondary mb-3">
+               <div class="card-header"><strong>{{ .Title }}</strong></div>
+               <div class="card-body">
+                  <p class="card-text lead">{{ .Content }}</p>
+               </div>
+               {{ if not .UpdatedAt }}
+               <div class="card-footer text-muted">Опубликовано: {{ .CreatedAt }} г.</div>
+               {{ else }}
+               <div class="card-footer text-muted">Отредактировано: {{ .UpdatedAt }} г.</div>
+               {{ end }}
+            </article>
+            {{ end }}
+         </section>
+
+      </main>
+
+      {{ end }}
+
+   </div>
+
+   <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      class="astro-vvvwv3sm"></script>
+
+   <footer class="mt-auto text-white-50">
+      <p>Сайт для задания by <a href="https://vk.com/chel.harosh" class="text-white">@Z4harSapan</a>.</p>
+   </footer>
+
 </body>
 
 </html>

@@ -9,7 +9,7 @@ import (
 	"zadanieweb/databases"
 	myerrors "zadanieweb/errors"
 	"zadanieweb/jwttokens"
-	"zadanieweb/users"
+	"zadanieweb/models"
 
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
@@ -71,7 +71,7 @@ func Handle_postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Передаем в состояние из main.go айди аутентифицированного пользователя
-	users.AuthMap[users.AuthKey] = userUUID.String()
+	models.AuthMap[models.AuthKey] = userUUID.String()
 
 	//Возвращаем на главную страницу
 	http.Redirect(w, r, "/api", http.StatusSeeOther)
@@ -103,13 +103,13 @@ func Handle_postRegister(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	users_, err := db.Exec("SELECT FROM users WHERE email = $1", email)
+	users, err := db.Exec("SELECT FROM users WHERE email = $1", email)
 	if err != nil {
 		fmt.Printf("Ошибка поиска совпадений по бд :( ")
 		panic(err)
 	}
 	//Проверка, что почта не занята
-	count, err := users_.RowsAffected()
+	count, err := users.RowsAffected()
 	if err != nil {
 		fmt.Printf("Ошибка c bd.RowsAffected() :( ")
 		panic(err)
@@ -159,13 +159,13 @@ func Handle_postRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Передаем в состояние из main.go айди аутентифицированного пользователя
-	users.AuthMap[users.AuthKey] = userUUID.String()
+	models.AuthMap[models.AuthKey] = userUUID.String()
 
 	http.Redirect(w, r, "/api", http.StatusSeeOther)
 }
 
 func Handle_exit(w http.ResponseWriter, r *http.Request) {
-	users.AuthMap[users.AuthKey] = ""
-	
+	models.AuthMap[models.AuthKey] = ""
+
 	http.Redirect(w, r, "/api", http.StatusSeeOther)
 }

@@ -36,9 +36,9 @@
       <header class="mb-auto">
          <div>
             <h3 class="float-md-start mb-0">Zadan1e</h3>
-            <nav class="nav nav-masthead justify-content-center float-md-end"> 
-               <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="/api">Главная</a> 
-               <a class="nav-link fw-bold py-1 px-0" href="#">Посты</a>
+            <nav class="nav nav-masthead justify-content-center float-md-end">
+               <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="/api">Главная</a>
+               <a class="nav-link fw-bold py-1 px-0" href="/api/posts">Посты</a>
                {{ if .Email}}
                <a class="nav-link fw-bold py-1 px-0" href="/api/auth/exit">Выйти</a>
                {{ end }}
@@ -57,7 +57,7 @@
          {{ end }}
          <p class="lead mb-4">
             {{ if eq .Role "Author" }}
-            Будучи автором вы можете выражать свои мысли в виде постов, 
+            Будучи автором вы можете выражать свои мысли в виде постов,
             делиться своими идеями и чувствами с читателями. Желаем вам удачи и вдохновения!
             {{ end }}
             {{ if eq .Role "Reader" }}
@@ -71,14 +71,14 @@
             {{ end }}
          </p>
          <!-- Если пользователь не зашёл, пишет войти, иначе "к постам" -->
-         <p class="lead"> 
-            <a href="/api/auth/getlogin" class="btn btn-lg btn-light fw-bold border-white bg-white" style="width: 120px; white-space: nowrap;">
-               {{ if .Email }}
-               К постам 
-               {{ else }}
-               Войти
-               {{ end }}
-            </a>
+         <p class="lead">
+            {{ if .Email }}
+            <a href="/api/posts" class="btn btn-lg btn-light fw-bold border-white bg-white"
+               style="width: 120px; white-space: nowrap;">К постам</a>
+            {{ else }}
+            <a href="/api/auth/getlogin" class="btn btn-lg btn-light fw-bold border-white bg-white"
+               style="width: 120px; white-space: nowrap;">Войти</a>
+            {{ end }}
          </p>
       </main>
       <footer class="mt-auto text-white-50">

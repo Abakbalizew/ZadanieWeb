@@ -1,10 +1,17 @@
 package handlers
 
+//
+//
+//
+
 import (
+	"database/sql"
+	"fmt"
 	"html/template"
 	"net/http"
+	"zadanieweb/databases"
 	myerrors "zadanieweb/errors"
-	"zadanieweb/users"
+	"zadanieweb/models"
 
 	"github.com/google/uuid"
 )
@@ -16,9 +23,9 @@ func Handle_api(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	userUUIDstring := users.AuthMap[users.AuthKey]
+	userUUIDstring := models.AuthMap[models.AuthKey]
 	if userUUIDstring != "" {
-		cur_user := users.User{}
+		cur_user := models.User{}
 
 		userUUID, err := uuid.Parse(userUUIDstring)
 		if err != nil {
@@ -29,7 +36,7 @@ func Handle_api(w http.ResponseWriter, r *http.Request) {
 
 		t.Execute(w, cur_user)
 	} else {
-		t.Execute(w, users.EmptyUser())
+		t.Execute(w, models.EmptyUser())
 	}
 
 }
@@ -60,5 +67,80 @@ func Handle_posts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+
+	db, err := sql.Open("postgres", databases.ConnStr)
+	if err != nil {
+		fmt.Printf("Ошибка подключения бд :( ")
+		panic(err)
+	}
+	defer db.Close()
+
+	//Наш пользователь
+	cur_user := models.User{}
+
+	//UUID пользователя в виде строки
+	userUUIDstring := models.AuthMap[models.AuthKey]
+	if userUUIDstring != "" {
+		cur_user = models.User{}
+
+		//Переводим строку в тип uuid.UUID
+		userUUID, err := uuid.Parse(userUUIDstring)
+		if err != nil {
+			panic(err)
+		}
+		//Заполняем нашего пользователя данными из бд
+		cur_user.FillUserWithUUID(userUUID)
+
+		//Если пользователь - читатель
+		if cur_user.Role == "Reader" {
+			//Выбираем из бд тольке те посты, которые опубликованы
+			posts, err := db.Query("SELECT * FROM posts "+
+				"WHERE status = $1 ORDER BY createdat DESC", "Published")
+			if err != nil {
+				fmt.Printf("Ошибка с поиском постов в бд :( ")
+				panic(err)
+			}
+			defer posts.Close()
+
+			for posts.Next() {
+				post := models.Post{}
+				err = posts.Scan(&post.PostUUID, &post.AuthorUUID,
+					&post.IdempotencyKey, &post.Title, &post.Content,
+					&post.CreatedAt, &post.UpdatedAt, &post.Status)
+				if err != nil {
+					panic(err)
+				}
+				//Посты уже отобраны, все со статусом "Published".
+				cur_user.Posts = append(cur_user.Posts, post)
+			}
+			//Если пользователь - автор
+			if cur_user.Role == "Author" {
+				//Выбираем из бд тольке посты пользователя
+				posts, err := db.Query("SELECT * FROM posts "+
+					"WHERE authorid = $1 ORDER BY createdat DESC", cur_user.UserUUID) ///////
+				if err != nil {
+					fmt.Printf("Ошибка с поиском постов в бд :( ")
+					panic(err)
+				}
+				defer posts.Close()
+
+				for posts.Next() {
+					post := models.Post{}
+					err = posts.Scan(&post.PostUUID, &post.AuthorUUID,
+						&post.IdempotencyKey, &post.Title, &post.Content,
+						&post.CreatedAt, &post.UpdatedAt, &post.Status)
+					if err != nil {
+						panic(err)
+					}
+					//Мы уже отобрали только посты нашего пользователя.
+					cur_user.Posts = append(cur_user.Posts, post)
+				}
+			}
+		}
+	} else {
+		cur_user = models.EmptyUser()
+	}
+
+	t.Execute(w, cur_user)
 
 }
