@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="max-height: max-content;">
+<html lang="en" style="max-height: max-content; height: 100vh;">
 
 <head>
    <meta charset="UTF-8">
@@ -27,10 +27,10 @@
       <!-- Пользователь не авторизован -->
       {{ if not .Email}}
       <main class="px-3">
-         <h1>Моё zadan1e.</h1>
-         <p class="lead mb-4">
+         <h1>!!!</h1>
+         <p class="lead mb-4" style="font-size: 150%;">
             Чтобы писать посты или смотреть посты других авторов, нужно
-            авторизоваться! (Это займёт менее 15 секунд)
+            авторизоваться!!! (Это займёт менее 15 секунд)
          </p>
          <p class="lead">
             <a href="/api/auth/getlogin" class="btn btn-lg btn-light fw-bold border-white bg-white"
@@ -108,15 +108,15 @@
 
       {{ end }}
 
+      <footer class="mt-auto text-white-50">
+      <p>Сайт для задания by <a href="https://vk.com/chel.harosh" class="text-white">@Z4harSapan</a>.</p>
+   </footer>
+
    </div>
 
    <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
       class="astro-vvvwv3sm"></script>
-
-   <footer class="mt-auto text-white-50">
-      <p>Сайт для задания by <a href="https://vk.com/chel.harosh" class="text-white">@Z4harSapan</a>.</p>
-   </footer>
 
 </body>
 
