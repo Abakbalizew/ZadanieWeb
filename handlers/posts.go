@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 	"zadanieweb/databases"
 	myerrors "zadanieweb/errors"
 	"zadanieweb/jwttokens"
@@ -164,4 +165,27 @@ func Handle_postRegister(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/api", http.StatusSeeOther)
 }
 
+func HandlePostCreation(w http.ResponseWriter, r *http.Request) {
+	postId := uuid.New()
+	authorId := models.AuthMap[models.AuthKey]
+	idempotencyKey := "coming later"
+	title := r.FormValue("postTitle")
+	content := r.FormValue("postContent")
+	createdAt := time.Now()
+	status := "Published"
 
+	db, err := sql.Open("postgres", databases.ConnStr)
+	if err != nil {
+		fmt.Printf("Ошибка подключения бд :( ")
+		panic(err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec("INSERT INTO posts (postid, authorid, idempotencykey, title, content, createdat, status)"+
+		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+		postId, authorId, idempotencyKey, title, content, createdAt, status)
+	if err != nil {
+		fmt.Printf("Ошибка передачи значений в бд :(")
+		panic(err)
+	}
+}

@@ -28,6 +28,8 @@ func main() {
 
 	//Посты
 	rtr.HandleFunc("/api/posts", handlers.Handle_posts).Methods("GET")
+	//Создание
+	rtr.HandleFunc("/api/posts/create", handlers.HandlePostCreation).Methods("POST")
 
 	rtr.HandleFunc("/api/auth/login", handlers.Handle_postLogin).Methods("POST")
 	rtr.HandleFunc("/api/auth/register", handlers.Handle_postRegister).Methods("POST")

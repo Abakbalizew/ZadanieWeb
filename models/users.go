@@ -22,7 +22,8 @@ type User struct {
 	RefreshToken   string
 	HashedPassword []byte
 	//Слайс постов, которые должны отображаться данному пользователю
-	Posts []Post
+	Posts  []Post
+	ErrMsg string
 }
 
 func EmptyUser() User {

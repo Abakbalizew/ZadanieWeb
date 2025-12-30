@@ -16,3 +16,7 @@ type Post struct {
 	UpdatedAt      time.Time
 	Status         string
 }
+
+// func NewIdempotencyKey(title string, userUUID string) string {
+// 	return title + userUUID
+// }
