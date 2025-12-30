@@ -164,8 +164,4 @@ func Handle_postRegister(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/api", http.StatusSeeOther)
 }
 
-func Handle_exit(w http.ResponseWriter, r *http.Request) {
-	models.AuthMap[models.AuthKey] = ""
 
-	http.Redirect(w, r, "/api", http.StatusSeeOther)
-}

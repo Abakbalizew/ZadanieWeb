@@ -19,7 +19,14 @@
             <nav class="nav nav-masthead justify-content-center float-md-end">
                <a class="nav-link fw-bold py-1 px-0" aria-current="page" href="/api">Главная</a>
                <a class="nav-link fw-bold py-1 px-0 active" href="#">Посты</a>
+               {{ if .Email}}
+               <a class="nav-link fw-bold py-1 px-0" href="/api/auth/exit-from-posts">Выйти</a>
+               {{ end }}
+               {{ if .Email }}
+               <p class="py-1 px-0" style="margin-left: 13px;">{{ .Email }}</p>
+               {{ else }}
                <a class="nav-link fw-bold py-1 px-0" href="/api/auth/getlogin">Зарег/Войти</a>
+               {{ end }}
             </nav>
          </div>
       </header>
@@ -64,8 +71,8 @@
 
       {{ end }}
 
-      <!-- Пользователь - автор -->
-      {{ if and (.Email) (eq .Role "Author") }}
+      <!-- Пользователь - автор с постами -->
+      {{ if and (.Email) (eq .Role "Author") (.Posts) }}
 
       <main class="px-3">
 
@@ -107,6 +114,36 @@
       </main>
 
       {{ end }}
+
+            <!-- Пользователь - автор без постов -->
+      {{ if and (.Email) (eq .Role "Author") (not .Posts) }}
+
+      <main class="px-3">
+
+         <h1>Напишите новый пост:</h1>
+
+         <form action="#" method="post" class="row g-3 my-4">
+            <div class="col-md-12">
+               <label for="postTitle" class="form-label">Заголовок поста</label>
+               <input type="text" class="form-control" id="postTitle" placeholder="Введите заголовок поста" required>
+            </div>
+            <div class="col-md-12">
+               <label for="postContent" class="form-label">Содержание поста</label>
+               <textarea class="form-control" id="postContent" rows="4" placeholder="Расскажите свою историю..."
+                  required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Создать пост</button>
+         </form>
+
+         <hr />
+
+         <h2>У вас пока что нет никаких работ.</h2>
+
+      </main>
+
+      {{ end }}
+
+      
 
       <footer class="mt-auto text-white-50">
       <p>Сайт для задания by <a href="https://vk.com/chel.harosh" class="text-white">@Z4harSapan</a>.</p>

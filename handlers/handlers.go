@@ -144,3 +144,16 @@ func Handle_posts(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, cur_user)
 
 }
+
+// Выход из аккаунта с главной страницы
+func Handle_exit(w http.ResponseWriter, r *http.Request) {
+	models.AuthMap[models.AuthKey] = ""
+
+	http.Redirect(w, r, "/api", http.StatusSeeOther)
+}
+
+func Handle_exit_from_posts(w http.ResponseWriter, r *http.Request) {
+	models.AuthMap[models.AuthKey] = ""
+
+	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
+}

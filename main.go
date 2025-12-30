@@ -23,6 +23,8 @@ func main() {
 	rtr.HandleFunc("/api/auth/getregister", handlers.Handle_getRegister).Methods("GET")
 	//Выход из аккаунта
 	rtr.HandleFunc("/api/auth/exit", handlers.Handle_exit).Methods("GET")
+	//Выход из аккаунта со страницы постов
+	rtr.HandleFunc("/api/auth/exit-from-posts", handlers.Handle_exit_from_posts).Methods("GET")
 
 	//Посты
 	rtr.HandleFunc("/api/posts", handlers.Handle_posts).Methods("GET")
