@@ -167,8 +167,7 @@ func Handle_postRegister(w http.ResponseWriter, r *http.Request) {
 
 func HandlePostCreation(w http.ResponseWriter, r *http.Request) {
 	postId := uuid.New()
-	authorId := models.AuthMap[models.AuthKey]
-	idempotencyKey := "coming later"
+	authorIdstring := models.AuthMap[models.AuthKey]
 	title := r.FormValue("postTitle")
 	content := r.FormValue("postContent")
 	createdAt := time.Now()
@@ -181,11 +180,66 @@ func HandlePostCreation(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	if authorIdstring == "" {
+		fmt.Printf("Ошибка: uuid пользователя пустой :( ")
+	}
+
+	authorId, err := uuid.Parse(authorIdstring)
+	if err != nil {
+		fmt.Printf("Ошибка в парсинге uuid! :( ")
+		panic(err)
+	}
+
+	idempotencyKey := models.NewIdempotencyKey(title, content, authorIdstring)
+
+	// //Проверим, что такого поста ещё нет, чтобы не создавать лишнюю копию...
+	// rows, err := db.Query("SELECT * FROM posts WHERE postid = $1", postId)
+
 	_, err = db.Exec("INSERT INTO posts (postid, authorid, idempotencykey, title, content, createdat, status)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+		" VALUES ($1, $2, $3, $4, $5, $6, $7)",
 		postId, authorId, idempotencyKey, title, content, createdAt, status)
 	if err != nil {
 		fmt.Printf("Ошибка передачи значений в бд :(")
 		panic(err)
 	}
+
+	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
+}
+
+func HandlePostSavingToDraft(w http.ResponseWriter, r *http.Request) {
+	postId := uuid.New()
+	authorIdstring := models.AuthMap[models.AuthKey]
+	title := r.FormValue("postTitle")
+	content := r.FormValue("postContent")
+	createdAt := time.Now()
+	status := "Draft"
+
+	db, err := sql.Open("postgres", databases.ConnStr)
+	if err != nil {
+		fmt.Printf("Ошибка подключения бд :( ")
+		panic(err)
+	}
+	defer db.Close()
+
+	if authorIdstring == "" {
+		fmt.Printf("Ошибка: uuid пользователя пустой :( ")
+	}
+
+	authorId, err := uuid.Parse(authorIdstring)
+	if err != nil {
+		fmt.Printf("Ошибка в парсинге uuid! :( ")
+		panic(err)
+	}
+
+	idempotencyKey := models.NewIdempotencyKey(title, content, authorIdstring)
+
+	_, err = db.Exec("INSERT INTO posts (postid, authorid, idempotencykey, title, content, createdat, status)"+
+		" VALUES ($1, $2, $3, $4, $5, $6, $7)",
+		postId, authorId, idempotencyKey, title, content, createdAt, status)
+	if err != nil {
+		fmt.Printf("Ошибка передачи значений в бд :(")
+		panic(err)
+	}
+
+	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
 }

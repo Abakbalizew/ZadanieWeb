@@ -1,7 +1,12 @@
 package jwttokens
 
 import (
+	"database/sql"
+	"fmt"
+	"net/http"
 	"time"
+	"zadanieweb/databases"
+	"zadanieweb/models"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -12,7 +17,7 @@ var secretKey = []byte("mmy_sseccrrett_kkeyy")
 func GenerateAccessToken(userId uuid.UUID) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userId,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+		"exp":     time.Now().Add(time.Hour * 2).Unix(),
 		//24 часа - срок годности
 	}
 
@@ -23,9 +28,9 @@ func GenerateAccessToken(userId uuid.UUID) (string, error) {
 func GenerateRefreshToken(userId uuid.UUID) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userId,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+		"exp":     time.Now().Add(time.Hour * 24 * 7).Unix(),
 		//24 часа - срок годности
-	} 
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(secretKey)
@@ -36,4 +41,72 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 		func(token *jwt.Token) (interface{}, error) {
 			return secretKey, nil
 		})
+}
+
+func CheckTokenMiddleWare(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//Наш пользователь
+		cur_user := models.User{}
+
+		//UUID пользователя в виде строки
+		userUUIDstring := models.AuthMap[models.AuthKey]
+		if userUUIDstring != "" {
+			cur_user = models.User{}
+
+			//Переводим строку в тип uuid.UUID
+			userUUID, err := uuid.Parse(userUUIDstring)
+			if err != nil {
+				panic(err)
+			}
+			//Заполняем нашего пользователя данными из бд
+			cur_user.FillUserWithUUID(userUUID)
+		}
+
+		accessToken_string := cur_user.AccessToken
+		accessToken, err := ParseToken(accessToken_string)
+		if err != nil {
+			fmt.Printf("Ошибка парсинга токена :( ")
+			panic(err)
+		}
+		//Если токен не валиден
+		if !accessToken.Valid {
+			refreshToken_string := cur_user.RefreshToken
+			refreshToken, err := ParseToken(refreshToken_string)
+			if err != nil {
+				fmt.Printf("Ошибка парсинга токена :( ")
+				panic(err)
+			}
+			//Если refrest-токен тоже не валиден, тогда обрываем работу функции, не вызвав next(w, r)
+			if !refreshToken.Valid {
+				fmt.Printf("Токен не валиден! ")
+				return
+				//Иначе создаем новый access-токен
+			} else {
+				new_access_token, err := GenerateAccessToken(cur_user.UserUUID)
+				if err != nil {
+					panic(err)
+				}
+				//Отправляем новый токен в бд, вызываем next(w, r)
+				db, err := sql.Open("postgres", databases.ConnStr)
+				if err != nil {
+					fmt.Printf("Ошибка подключения бд :( ")
+					panic(err)
+				}
+				defer db.Close()
+
+				_, err = db.Exec("UPDATE users SET accesstoken = $1 WHERE userid = $2", new_access_token, cur_user.UserUUID)
+				if err != nil {
+					fmt.Printf("Ошибка в отправке токенов в бд :( ")
+					panic(err)
+				}
+
+				next(w, r)
+			}
+			//Если же access-токен валиден
+		} else {
+			next(w, r)
+		}
+
+	}
+
 }

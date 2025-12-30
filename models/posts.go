@@ -17,6 +17,7 @@ type Post struct {
 	Status         string
 }
 
-// func NewIdempotencyKey(title string, userUUID string) string {
-// 	return title + userUUID
-// }
+// Ключ, уникальный для всех постов
+func NewIdempotencyKey(title string, content string, userUUID string) string {
+	return title + "123" + content + userUUID + "123"
+}

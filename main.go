@@ -30,6 +30,11 @@ func main() {
 	rtr.HandleFunc("/api/posts", handlers.Handle_posts).Methods("GET")
 	//Создание
 	rtr.HandleFunc("/api/posts/create", handlers.HandlePostCreation).Methods("POST")
+	//Сохранение в черновик
+	rtr.HandleFunc("/api/posts/save", handlers.HandlePostSavingToDraft).Methods("POST")
+	//Редактирование постов
+	rtr.HandleFunc("/api/posts/{uuid:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}",
+		handlers.PostEditHandler).Methods("GET")
 
 	rtr.HandleFunc("/api/auth/login", handlers.Handle_postLogin).Methods("POST")
 	rtr.HandleFunc("/api/auth/register", handlers.Handle_postRegister).Methods("POST")
