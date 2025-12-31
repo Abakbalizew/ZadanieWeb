@@ -111,6 +111,11 @@ func Handle_posts(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					panic(err)
 				}
+				if post.CreatedAt.After(post.UpdatedAt) {
+					post.LastEditedAt = post.CreatedAt
+				} else {
+					post.LastEditedAt = post.UpdatedAt
+				}
 				//Посты уже отобраны, все со статусом "Published".
 				cur_user.Posts = append(cur_user.Posts, post)
 			}
@@ -134,6 +139,12 @@ func Handle_posts(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					panic(err)
 				}
+				if post.CreatedAt.After(post.UpdatedAt) {
+					post.LastEditedAt = post.CreatedAt
+				} else {
+					post.LastEditedAt = post.UpdatedAt
+				}
+
 				//Мы уже отобрали только посты нашего пользователя.
 				cur_user.Posts = append(cur_user.Posts, post)
 			}
@@ -160,6 +171,7 @@ func Handle_exit_from_posts(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
 }
 
+// Обрабатывает страницу редактирования поста
 func PostEditHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/postedit.html")
 	if err != nil {
@@ -188,4 +200,23 @@ func PostEditHandler(w http.ResponseWriter, r *http.Request) {
 
 	t.Execute(w, cur_post)
 
+}
+
+func PostDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postUUID := vars["uuid"]
+
+	db, err := sql.Open("postgres", databases.ConnStr)
+	if err != nil {
+		fmt.Printf("Ошибка подключения бд :( ")
+		panic(err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec("DELETE FROM posts WHERE postid = $1", postUUID)
+	if err != nil {
+		panic(err)
+	}
+
+	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
 }

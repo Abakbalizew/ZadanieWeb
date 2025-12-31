@@ -14,7 +14,11 @@ type Post struct {
 	Content        string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
-	Status         string
+	//Поле LastEditedAt равно более позднему из CreatedAt и UpdatedAt,
+	//это необходимо, чтобы отследить, что было последнее и отобразить именно
+	//эту дату в публикации/изменении поста
+	LastEditedAt time.Time
+	Status       string
 }
 
 // Ключ, уникальный для всех постов

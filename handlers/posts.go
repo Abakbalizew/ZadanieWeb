@@ -13,6 +13,7 @@ import (
 	"zadanieweb/models"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -165,81 +166,95 @@ func Handle_postRegister(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/api", http.StatusSeeOther)
 }
 
-func HandlePostCreation(w http.ResponseWriter, r *http.Request) {
-	postId := uuid.New()
-	authorIdstring := models.AuthMap[models.AuthKey]
-	title := r.FormValue("postTitle")
-	content := r.FormValue("postContent")
-	createdAt := time.Now()
-	status := "Published"
+func HandlePostCreationORSavingToDraft(status string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db, err := sql.Open("postgres", databases.ConnStr)
+		if err != nil {
+			fmt.Printf("Ошибка подключения бд :( ")
+			panic(err)
+		}
+		defer db.Close()
 
-	db, err := sql.Open("postgres", databases.ConnStr)
-	if err != nil {
-		fmt.Printf("Ошибка подключения бд :( ")
-		panic(err)
+		authorIdstring := models.AuthMap[models.AuthKey]
+		title := r.FormValue("postTitle")
+		content := r.FormValue("postContent")
+
+		if authorIdstring == "" {
+			fmt.Printf("Ошибка: uuid пользователя пустой :( ")
+			return
+		}
+
+		//
+		vars := mux.Vars(r)
+		postUUID := vars["uuid"]
+
+		//
+		if postUUID != "" {
+			//
+			var old_status string = ""
+			err := db.QueryRow("SELECT status FROM posts WHERE postid = $1", postUUID).Scan(&old_status)
+			if err != nil {
+				fmt.Printf("Ошибка! Такой пост не удалось найти в бд :( ")
+				panic(err)
+			}
+
+			//
+			created_updated_at := time.Now()
+
+			//
+			if old_status == "Published" {
+				_, err = db.Exec("UPDATE posts SET title = $1, content = $2, updatedat = $3 WHERE postid = $4",
+					title, content, created_updated_at, postUUID)
+				if err != nil {
+					panic(err)
+				}
+				//
+			} else {
+				//
+				if status == "Published" {
+					_, err = db.Exec("UPDATE posts SET title = $1, content = $2, createdat = $3, status = $4 WHERE postid = $5",
+						title, content, created_updated_at, status, postUUID)
+					if err != nil {
+						panic(err)
+					}
+					//
+				} else {
+					_, err = db.Exec("UPDATE posts SET title = $1, content = $2, createdat = $3 WHERE postid = $4",
+						title, content, created_updated_at, postUUID)
+					if err != nil {
+						panic(err)
+					}
+				}
+
+			}
+			//Если запрос был без uuid, то есть такого поста ещё не существует,
+			//нам нужно создать его
+		} else {
+			//
+			postId := uuid.New()
+			createdAt := time.Now()
+			var updatedAt time.Time
+
+			//
+			authorId, err := uuid.Parse(authorIdstring)
+			if err != nil {
+				fmt.Printf("Ошибка в парсинге uuid! :( ")
+				panic(err)
+			}
+
+			//
+			idempotencyKey := models.NewIdempotencyKey(title, content, authorIdstring)
+
+			_, err = db.Exec("INSERT INTO posts (postid, authorid, idempotencykey, title, content, createdat, updatedat, status)"+
+				" VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+				postId, authorId, idempotencyKey, title, content, createdAt, updatedAt, status)
+			if err != nil {
+				fmt.Printf("Ошибка передачи значений в бд :(")
+				panic(err)
+			}
+		}
+
+		http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
 	}
-	defer db.Close()
 
-	if authorIdstring == "" {
-		fmt.Printf("Ошибка: uuid пользователя пустой :( ")
-	}
-
-	authorId, err := uuid.Parse(authorIdstring)
-	if err != nil {
-		fmt.Printf("Ошибка в парсинге uuid! :( ")
-		panic(err)
-	}
-
-	idempotencyKey := models.NewIdempotencyKey(title, content, authorIdstring)
-
-	// //Проверим, что такого поста ещё нет, чтобы не создавать лишнюю копию...
-	// rows, err := db.Query("SELECT * FROM posts WHERE postid = $1", postId)
-
-	_, err = db.Exec("INSERT INTO posts (postid, authorid, idempotencykey, title, content, createdat, status)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7)",
-		postId, authorId, idempotencyKey, title, content, createdAt, status)
-	if err != nil {
-		fmt.Printf("Ошибка передачи значений в бд :(")
-		panic(err)
-	}
-
-	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
-}
-
-func HandlePostSavingToDraft(w http.ResponseWriter, r *http.Request) {
-	postId := uuid.New()
-	authorIdstring := models.AuthMap[models.AuthKey]
-	title := r.FormValue("postTitle")
-	content := r.FormValue("postContent")
-	createdAt := time.Now()
-	status := "Draft"
-
-	db, err := sql.Open("postgres", databases.ConnStr)
-	if err != nil {
-		fmt.Printf("Ошибка подключения бд :( ")
-		panic(err)
-	}
-	defer db.Close()
-
-	if authorIdstring == "" {
-		fmt.Printf("Ошибка: uuid пользователя пустой :( ")
-	}
-
-	authorId, err := uuid.Parse(authorIdstring)
-	if err != nil {
-		fmt.Printf("Ошибка в парсинге uuid! :( ")
-		panic(err)
-	}
-
-	idempotencyKey := models.NewIdempotencyKey(title, content, authorIdstring)
-
-	_, err = db.Exec("INSERT INTO posts (postid, authorid, idempotencykey, title, content, createdat, status)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7)",
-		postId, authorId, idempotencyKey, title, content, createdAt, status)
-	if err != nil {
-		fmt.Printf("Ошибка передачи значений в бд :(")
-		panic(err)
-	}
-
-	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
 }

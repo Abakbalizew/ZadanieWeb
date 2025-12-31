@@ -63,10 +63,14 @@
                <div class="card-body">
                   <p class="card-text lead">{{ .Content }}</p>
                </div>
-               {{ if not .UpdatedAt }}
-               <div class="card-footer text-muted">Опубликовано: {{ .CreatedAt }} г.</div>
+               {{ if eq .LastEditedAt .CreatedAt }}
+               <div class="card-footer text-muted" style="color: #29552f !important;">
+                  Опубликовано: {{ .LastEditedAt }}
+               </div>
                {{ else }}
-               <div class="card-footer text-muted">Отредактировано: {{ .UpdatedAt }} г.</div>
+               <div class="card-footer text-muted" style="color: #5c6c14 !important;">
+                  Отредактировано: {{ .LastEditedAt }}
+               </div>
                {{ end }}
             </article>
             {{ end }}
@@ -117,14 +121,15 @@
                {{ if eq .Status "Draft" }}
                <div class="card-footer text-muted" style="color: #6b1a1a !important;">В черновике</div>
                {{ end }}
-               {{ if and (not .UpdatedAt) (eq .Status "Published") }}
-               <div class="card-footer text-muted" style="color: #29552f !important;">Опубликовано: {{ .CreatedAt }}
+               {{ if and (eq .LastEditedAt .CreatedAt) (eq .Status "Published") }}
+               <div class="card-footer text-muted" style="color: #29552f !important;">Опубликовано: {{ .LastEditedAt.Format "2006-01-02 15:04:05" }}
                </div>
                {{ end }}
-               {{ if and (.UpdatedAt) (eq .Status "Published") }}
-               <div class="card-footer text-muted" style="color: #5c6c14 !important;">Отредактировано: {{ .UpdatedAt }}
+               {{ if and (ne .LastEditedAt .CreatedAt) (eq .Status "Published") }}
+               <div class="card-footer text-muted" style="color: #5c6c14 !important;">Отредактировано: {{ .LastEditedAt.Format "2006-01-02 15:04:05" }}
                </div>
                {{ end }}
+               <!-- {{ .LastEditedAt.Format "2006-01-02 15:04:05" }} -->
             </article>
             {{ end }}
          </section>
@@ -152,7 +157,7 @@
                   placeholder="Расскажите свою историю..." required></textarea>
             </div>
             <button type="submit" class="btn btn-primary mt-3">Опубликовать пост</button>
-            <button type="submit" formaction="/api/posts/save" class="btn btn-outline-primary mt-3">Сохранить 
+            <button type="submit" formaction="/api/posts/save" class="btn btn-outline-primary mt-3">Сохранить
                черновик</button>
          </form>
 
