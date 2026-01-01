@@ -27,7 +27,10 @@
 
       <main class="px-3">
 
-         <h2>Редактирование поста</h2>
+         <div style="display: flex; align-items: center; position: relative;">
+            <a href="/api/posts" class="nav-link fw-bold py-1 px-0" style="font-size: 2rem; margin-bottom: 12px;"> Назад</a>
+            <h2 style="position: absolute;  left: 24%;">Редактирование поста</h2>
+         </div>
 
          <form action="/api/posts/create{{ .PostUUID }}" method="post" class="row g-3 my-4">
             <div class="col-md-12">
@@ -40,10 +43,14 @@
                   required>{{ .Content }}
                </textarea>
             </div>
+            {{ if eq .Status "Draft" }}
             <button type="submit" class="btn btn-primary mt-3">Опубликовать пост</button>
+            {{ else }}
+            <button type="submit" class="btn btn-primary mt-3">Сохранить изменения</button>
+            {{ end }}
             {{ if eq .Status "Draft" }}
             <button type="submit" formaction="/api/posts/save{{ .PostUUID }}" class="btn btn-outline-primary mt-3">Сохранить 
-               черновик</button>
+               изменения в черновике</button>
             {{ end }}
             <button type="submit" class="btn btn-danger mt-3" formaction="/api/posts/delete{{ .PostUUID }}" class="btn btn-outline-primary mt-3">
                Удалить пост</button>

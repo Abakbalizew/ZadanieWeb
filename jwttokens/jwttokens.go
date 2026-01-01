@@ -60,26 +60,24 @@ func CheckTokenMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 			}
 			//Заполняем нашего пользователя данными из бд
 			cur_user.FillUserWithUUID(userUUID)
+		} else {
+			http.Redirect(w, r, "/api/auth/getlogin", http.StatusSeeOther)
+			return
 		}
 
 		accessToken_string := cur_user.AccessToken
 		accessToken, err := ParseToken(accessToken_string)
-		if err != nil {
-			fmt.Printf("Ошибка парсинга токена :( ")
-			panic(err)
-		}
+
 		//Если токен не валиден
-		if !accessToken.Valid {
+		if !accessToken.Valid || err != nil {
 			refreshToken_string := cur_user.RefreshToken
 			refreshToken, err := ParseToken(refreshToken_string)
-			if err != nil {
-				fmt.Printf("Ошибка парсинга токена :( ")
-				panic(err)
-			}
 			//Если refrest-токен тоже не валиден, тогда обрываем работу функции, не вызвав next(w, r)
-			if !refreshToken.Valid {
+			if !refreshToken.Valid || err != nil {
 				fmt.Printf("Токен не валиден! ")
+				http.Redirect(w, r, "/api/auth/getlogin", http.StatusSeeOther)
 				return
+
 				//Иначе создаем новый access-токен
 			} else {
 				new_access_token, err := GenerateAccessToken(cur_user.UserUUID)

@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"zadanieweb/handlers"
+	"zadanieweb/jwttokens"
 	"zadanieweb/models"
 
 	"github.com/gorilla/mux"
@@ -28,20 +29,22 @@ func main() {
 
 	//Посты
 	rtr.HandleFunc("/api/posts", handlers.Handle_posts).Methods("GET")
-	//Создание
+	//Создание (с проверкой jwt токена)
 	rtr.HandleFunc("/api/posts/create{uuid:(?:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})?}",
-		handlers.HandlePostCreationORSavingToDraft("Published")).Methods("POST")
-	//Сохранение в черновик
+		jwttokens.CheckTokenMiddleWare(handlers.HandlePostCreationORSavingToDraft("Published"))).Methods("POST")
+	//Сохранение в черновик (с проверкой jwt токена)
 	rtr.HandleFunc("/api/posts/save{uuid:(?:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})?}",
-		handlers.HandlePostCreationORSavingToDraft("Draft")).Methods("POST")
-	//Редактирование поста поста
+		jwttokens.CheckTokenMiddleWare(handlers.HandlePostCreationORSavingToDraft("Draft"))).Methods("POST")
+	//Редактирование отдельного поста (с проверкой jwt токена)
 	rtr.HandleFunc("/api/posts/{uuid:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}",
-		handlers.PostEditHandler).Methods("GET")
-	//Удаление поста
+		jwttokens.CheckTokenMiddleWare(handlers.PostEditHandler)).Methods("GET")
+	//Удаление поста (с проверкой jwt токена)
 	rtr.HandleFunc("/api/posts/delete{uuid:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}",
-		handlers.PostDeleteHandler).Methods("POST")
+		jwttokens.CheckTokenMiddleWare(handlers.PostDeleteHandler)).Methods("POST")
 
+	//Пост-запрос на вход в учётную запись
 	rtr.HandleFunc("/api/auth/login", handlers.Handle_postLogin).Methods("POST")
+	//Пост-запрос на регистрацию
 	rtr.HandleFunc("/api/auth/register", handlers.Handle_postRegister).Methods("POST")
 
 	http.Handle("/", rtr)
