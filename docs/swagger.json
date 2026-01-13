@@ -1,0 +1,156 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Здесь можно делиться своими мыслями и искать себе кумиров.",
+        "title": "Zadan1e",
+        "contact": {
+            "name": "S4pan",
+            "email": "z4har.sapan@gmail.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api",
+    "paths": {
+        "/api": {
+            "get": {
+                "tags": [
+                    "Main"
+                ],
+                "summary": "Главная страница",
+                "responses": {}
+            }
+        },
+        "/api/auth/createORsave{uuid}": {
+            "post": {
+                "description": "Эндпоинт может быть выглядить: ../save{uuid} или ../create{uuid}",
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Публикация, изменение или сохранение в черновик поста",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post uuid",
+                        "name": "uuid",
+                        "in": "path"
+                    },
+                    {
+                        "description": "Draft or Published",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Authoriztion"
+                ],
+                "summary": "Запрос на вход в аккаунт",
+                "responses": {}
+            }
+        },
+        "/api/auth/loginPage": {
+            "get": {
+                "description": "Имеются 2 формы для почты и пароля.",
+                "tags": [
+                    "Authoriztion"
+                ],
+                "summary": "Страница входа в аккаунт",
+                "responses": {}
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Authoriztion"
+                ],
+                "summary": "Запрос на регистрацию",
+                "responses": {}
+            }
+        },
+        "/api/auth/registerPage": {
+            "get": {
+                "description": "Имеются 3 формы для почты, пароля и роли.",
+                "tags": [
+                    "Authoriztion"
+                ],
+                "summary": "Страница регистрации",
+                "responses": {}
+            }
+        },
+        "/api/posts": {
+            "get": {
+                "description": "Страница постов отображается по разному в зависимости от роли и наличия авторизации.",
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Страница постов",
+                "responses": {}
+            }
+        },
+        "/api/posts/delete{uuid}": {
+            "delete": {
+                "description": "Удаление конкретного поста.",
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Удаление поста",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post uuid",
+                        "name": "uuid",
+                        "in": "path"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/posts/exitFromMainPage": {
+            "get": {
+                "description": "Выход из аккаунта, мы остаёмся на той же странице",
+                "tags": [
+                    "Authoriztion"
+                ],
+                "summary": "Выход из аккаунта с главной страницы",
+                "responses": {}
+            }
+        },
+        "/api/posts/exitFromPosts": {
+            "get": {
+                "description": "Выход из аккаунта, мы остаёмся на той же странице.",
+                "tags": [
+                    "Authoriztion"
+                ],
+                "summary": "Выход из аккаунта со страницы постов",
+                "responses": {}
+            }
+        },
+        "/api/posts/{uuid}": {
+            "get": {
+                "description": "Страница редактирования конкретного поста.",
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Редактирование поста",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post uuid",
+                        "name": "uuid",
+                        "in": "path"
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    }
+}

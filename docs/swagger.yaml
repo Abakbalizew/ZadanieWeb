@@ -1,0 +1,107 @@
+basePath: /api
+host: localhost:8080
+info:
+  contact:
+    email: z4har.sapan@gmail.com
+    name: S4pan
+  description: Здесь можно делиться своими мыслями и искать себе кумиров.
+  title: Zadan1e
+  version: "1.0"
+paths:
+  /api:
+    get:
+      responses: {}
+      summary: Главная страница
+      tags:
+      - Main
+  /api/auth/createORsave{uuid}:
+    post:
+      description: 'Эндпоинт может быть выглядить: ../save{uuid} или ../create{uuid}'
+      parameters:
+      - description: Post uuid
+        in: path
+        name: uuid
+        type: string
+      - description: Draft or Published
+        in: body
+        name: status
+        required: true
+        schema:
+          type: string
+      responses: {}
+      summary: Публикация, изменение или сохранение в черновик поста
+      tags:
+      - Posts
+  /api/auth/login:
+    post:
+      responses: {}
+      summary: Запрос на вход в аккаунт
+      tags:
+      - Authoriztion
+  /api/auth/loginPage:
+    get:
+      description: Имеются 2 формы для почты и пароля.
+      responses: {}
+      summary: Страница входа в аккаунт
+      tags:
+      - Authoriztion
+  /api/auth/register:
+    post:
+      responses: {}
+      summary: Запрос на регистрацию
+      tags:
+      - Authoriztion
+  /api/auth/registerPage:
+    get:
+      description: Имеются 3 формы для почты, пароля и роли.
+      responses: {}
+      summary: Страница регистрации
+      tags:
+      - Authoriztion
+  /api/posts:
+    get:
+      description: Страница постов отображается по разному в зависимости от роли и
+        наличия авторизации.
+      responses: {}
+      summary: Страница постов
+      tags:
+      - Posts
+  /api/posts/{uuid}:
+    get:
+      description: Страница редактирования конкретного поста.
+      parameters:
+      - description: Post uuid
+        in: path
+        name: uuid
+        type: string
+      responses: {}
+      summary: Редактирование поста
+      tags:
+      - Posts
+  /api/posts/delete{uuid}:
+    delete:
+      description: Удаление конкретного поста.
+      parameters:
+      - description: Post uuid
+        in: path
+        name: uuid
+        type: string
+      responses: {}
+      summary: Удаление поста
+      tags:
+      - Posts
+  /api/posts/exitFromMainPage:
+    get:
+      description: Выход из аккаунта, мы остаёмся на той же странице
+      responses: {}
+      summary: Выход из аккаунта с главной страницы
+      tags:
+      - Authoriztion
+  /api/posts/exitFromPosts:
+    get:
+      description: Выход из аккаунта, мы остаёмся на той же странице.
+      responses: {}
+      summary: Выход из аккаунта со страницы постов
+      tags:
+      - Authoriztion
+swagger: "2.0"

@@ -17,8 +17,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Главная страница
-func Handle_api(w http.ResponseWriter, r *http.Request) {
+// MainPageHandler Главная страница
+// @Summary Главная страница
+// @Router /api [get]
+// @Tags Main
+func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/api.html")
 	if err != nil {
 		panic(err)
@@ -42,28 +45,44 @@ func Handle_api(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Обработчик страницы входа в аккаунт
-func Handle_getLogin(w http.ResponseWriter, r *http.Request) {
+// LoginPageHandler Страница входа в аккаунт
+// @Summary Страница входа в аккаунт
+// @Description Имеются 2 формы для почты и пароля.
+// @Router /api/auth/loginPage [get]
+// @Tags Authoriztion
+func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/getlogin.html")
 	if err != nil {
 		panic(err)
 	}
+
 	t.Execute(w, myerrors.Cur_error)
+
 	myerrors.Cur_error.ErrMsg = ""
 }
 
-// Обработчик страницы входа в аккаунт
-func Handle_getRegister(w http.ResponseWriter, r *http.Request) {
+// RegisterPageHandler Страница регистрации
+// @Summary Страница регистрации
+// @Description Имеются 3 формы для почты, пароля и роли.
+// @Router /api/auth/registerPage [get]
+// @Tags Authoriztion
+func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/getregister.html")
 	if err != nil {
 		panic(err)
 	}
+
 	t.Execute(w, myerrors.Cur_error)
+
 	myerrors.Cur_error.ErrMsg = ""
 }
 
-// Обработчик страницы с постами
-func Handle_posts(w http.ResponseWriter, r *http.Request) {
+// PostsHandler Страница постов
+// @Summary Страница постов
+// @Description Страница постов отображается по разному в зависимости от роли и наличия авторизации.
+// @Router /api/posts [get]
+// @Tags Posts
+func PostsHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/posts.html")
 	if err != nil {
 		panic(err)
@@ -105,6 +124,7 @@ func Handle_posts(w http.ResponseWriter, r *http.Request) {
 
 			for posts.Next() {
 				post := models.Post{}
+
 				err = posts.Scan(&post.PostUUID, &post.AuthorUUID,
 					&post.IdempotencyKey, &post.Title, &post.Content,
 					&post.CreatedAt, &post.UpdatedAt, &post.Status)
@@ -116,6 +136,25 @@ func Handle_posts(w http.ResponseWriter, r *http.Request) {
 				} else {
 					post.LastEditedAt = post.UpdatedAt
 				}
+
+				//Проверяем, есть ли у поста изображение:
+				imageRows, err := db.Query("SELECT imageurl FROM images WHERE postid = $1", post.PostUUID)
+				if err != nil {
+					fmt.Printf("Ошибка поиска значений из бд! :( ")
+					panic(err)
+				} //Если нет:
+				if !imageRows.Next() {
+					post.ImageUrl = ""
+				} else { //Если да:
+					imageRows.Scan(&post.ImageUrl)
+				}
+
+				//Получаем email автора
+				err = db.QueryRow("SELECT email FROM users WHERE userid = $1", post.AuthorUUID).Scan(&post.AuthorEmail)
+				if err != nil {
+					panic(err)
+				}
+
 				//Посты уже отобраны, все со статусом "Published".
 				cur_user.Posts = append(cur_user.Posts, post)
 			}
@@ -145,11 +184,23 @@ func Handle_posts(w http.ResponseWriter, r *http.Request) {
 					post.LastEditedAt = post.UpdatedAt
 				}
 
+				//Проверяем, есть ли у поста изображение:
+				imageRows, err := db.Query("SELECT imageurl FROM images WHERE postid = $1", post.PostUUID)
+				if err != nil {
+					fmt.Printf("Ошибка поиска значений из бд! :( ")
+					panic(err)
+				} //Если нет:
+				if !imageRows.Next() {
+					post.ImageUrl = ""
+				} else { //Если да:
+					imageRows.Scan(&post.ImageUrl)
+				}
+
 				//Мы уже отобрали только посты нашего пользователя.
 				cur_user.Posts = append(cur_user.Posts, post)
 			}
 		}
-
+		//Если пользователь не авторизован
 	} else {
 		cur_user = models.EmptyUser()
 	}
@@ -158,20 +209,34 @@ func Handle_posts(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Выход из аккаунта с главной страницы
-func Handle_exit(w http.ResponseWriter, r *http.Request) {
+// ExitFromMainPageHandler Выход из аккаунта с главной страницы
+// @Summary Выход из аккаунта с главной страницы
+// @Description Выход из аккаунта, мы остаёмся на той же странице
+// @Router /api/posts/exitFromMainPage [get]
+// @Tags Authoriztion
+func ExitFromMainPageHandler(w http.ResponseWriter, r *http.Request) {
 	models.AuthMap[models.AuthKey] = ""
 
 	http.Redirect(w, r, "/api", http.StatusSeeOther)
 }
 
-func Handle_exit_from_posts(w http.ResponseWriter, r *http.Request) {
+// ExitFromMainPageHandler Выход из аккаунта со страницы постов
+// @Summary Выход из аккаунта со страницы постов
+// @Description Выход из аккаунта, мы остаёмся на той же странице.
+// @Router /api/posts/exitFromPosts [get]
+// @Tags Authoriztion
+func ExitFromPostsHandler(w http.ResponseWriter, r *http.Request) {
 	models.AuthMap[models.AuthKey] = ""
 
-	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
+	http.Redirect(w, r, "/api/posts", http.StatusOK)
 }
 
-// Обрабатывает страницу редактирования поста
+// PostEditHandler Редактирование поста
+// @Summary Редактирование поста
+// @Description Страница редактирования конкретного поста.
+// @param uuid path string false "Post uuid"
+// @Router /api/posts/{uuid} [get]
+// @Tags Posts
 func PostEditHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/postedit.html")
 	if err != nil {
@@ -198,25 +263,15 @@ func PostEditHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	//Проверим, есть ли изображение:
+	imageRows, err := db.Query("SELECT imageurl FROM images WHERE postid = $1", postUUID)
+	if err != nil {
+		fmt.Printf("Ошибка поиска значений из бд! :( ")
+		panic(err)
+	}
+	if imageRows.Next() {
+		imageRows.Scan(&cur_post.ImageUrl)
+	}
+
 	t.Execute(w, cur_post)
-
-}
-
-func PostDeleteHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	postUUID := vars["uuid"]
-
-	db, err := sql.Open("postgres", databases.ConnStr)
-	if err != nil {
-		fmt.Printf("Ошибка подключения бд :( ")
-		panic(err)
-	}
-	defer db.Close()
-
-	_, err = db.Exec("DELETE FROM posts WHERE postid = $1", postUUID)
-	if err != nil {
-		panic(err)
-	}
-
-	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
 }

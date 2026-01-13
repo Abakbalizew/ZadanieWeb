@@ -18,7 +18,10 @@ type Post struct {
 	//это необходимо, чтобы отследить, что было последнее и отобразить именно
 	//эту дату в публикации/изменении поста
 	LastEditedAt time.Time
-	Status       string
+	Status       string //="Published" || ="Draft"
+	//url-адрес картинки
+	ImageUrl string
+	AuthorEmail string
 }
 
 // Ключ, уникальный для всех постов

@@ -59,10 +59,18 @@
          <section class="my-4">
             {{ range .Posts }}
             <article class="card text-bg-dark border-secondary mb-3">
-               <div class="card-header"><strong>{{ .Title }}</strong></div>
+               <div class="card-header" style="position: relative;">
+                  <p style="position: absolute; top: 7px; left: 78%;">{{ .AuthorEmail }}</p>
+                  <strong style="margin-right: 85px;">{{ .Title }}</strong>
+               </div>
                <div class="card-body">
                   <p class="card-text lead">{{ .Content }}</p>
                </div>
+               {{ if ne .ImageUrl "" }}
+               <div class="card-body" style="display: flex; justify-content: center;">
+                  <img src="{{ .ImageUrl }}" alt="Не удалось загрузить изображение" style="max-width: 100%;">
+               </div>                 
+               {{ end }}         
                {{ if eq .LastEditedAt .CreatedAt }}
                <div class="card-footer text-muted" style="color: #29552f !important;">
                   Опубликовано: {{ .LastEditedAt }}
@@ -118,6 +126,11 @@
                <div class="card-body">
                   <p class="card-text lead">{{ .Content }}</p>
                </div>
+               {{ if ne .ImageUrl "" }}
+               <div class="card-body" style="display: flex; justify-content: center;">
+                  <img src="{{ .ImageUrl }}" alt="Не удалось загрузить изображение" style="max-width: 100%;">
+               </div>          
+               {{ end }}
                {{ if eq .Status "Draft" }}
                <div class="card-footer text-muted" style="color: #6b1a1a !important;">В черновике</div>
                {{ end }}

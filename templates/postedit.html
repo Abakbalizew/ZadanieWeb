@@ -14,7 +14,7 @@
 
    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
 
-      <header class="mb-auto">
+      <header style="margin-bottom: 10px;">
          <div>
             <h3 class="float-md-start mb-0">Zadan1e</h3>
             <nav class="nav nav-masthead justify-content-center float-md-end">
@@ -32,7 +32,7 @@
             <h2 style="position: absolute;  left: 24%;">Редактирование поста</h2>
          </div>
 
-         <form action="/api/posts/create{{ .PostUUID }}" method="post" class="row g-3 my-4">
+         <form action="/api/posts/create{{ .PostUUID }}" method="post" class="row g-3">
             <div class="col-md-12">
                <label for="postTitle" class="form-label">Заголовок поста</label>
                <input type="text" value="{{ .Title }}" name="postTitle" class="form-control" id="postTitle" placeholder="Введите заголовок поста" required>
@@ -43,6 +43,10 @@
                   required>{{ .Content }}
                </textarea>
             </div>
+            <div class="col-md-12">
+               <label for="postTitle" class="form-label">Изображение</label>
+               <input type="text" value="{{ .ImageUrl }}" name="imageUrl" class="form-control" id="imageUrl" placeholder="Введите url-адрес изображения">
+            </div class="col-md-12">            
             {{ if eq .Status "Draft" }}
             <button type="submit" class="btn btn-primary mt-3">Опубликовать пост</button>
             {{ else }}

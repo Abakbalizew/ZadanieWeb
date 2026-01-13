@@ -18,8 +18,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Обрабатывается, когда пользователь пытается войти в учётную запись (нажимает "Войти")
-func Handle_postLogin(w http.ResponseWriter, r *http.Request) {
+// LoginRequestHandler Запрос на вход в аккаунт
+// @Summary Запрос на вход в аккаунт
+// @Router /api/auth/login [post]
+// @Tags Authoriztion
+func LoginRequestHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			//Если ошибка, то выводим её на экран.
@@ -79,8 +82,11 @@ func Handle_postLogin(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/api", http.StatusSeeOther)
 }
 
-// Обрабатывается, когда пользователь пытается зарегистрироваться (нажимает "Зарегистрироваться")
-func Handle_postRegister(w http.ResponseWriter, r *http.Request) {
+// RegisterRequestHandler Запрос на регистрацию
+// @Summary Запрос на регистрацию
+// @Router /api/auth/register [post]
+// @Tags Authoriztion
+func RegisterRequestHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			//Если ошибка, то выводим её на экран.
@@ -166,6 +172,13 @@ func Handle_postRegister(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/api", http.StatusSeeOther)
 }
 
+// HandlePostCreationORSavingToDraft Публикация, изменение или сохранение в черновик поста
+// @Summary Публикация, изменение или сохранение в черновик поста
+// @Description Эндпоинт может быть выглядить: ../save{uuid} или ../create{uuid}
+// @param uuid path string false "Post uuid"
+// @param status body string true "Draft or Published"
+// @Router /api/auth/createORsave{uuid} [post]
+// @Tags Posts
 func HandlePostCreationORSavingToDraft(status string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db, err := sql.Open("postgres", databases.ConnStr)
@@ -225,8 +238,40 @@ func HandlePostCreationORSavingToDraft(status string) http.HandlerFunc {
 						panic(err)
 					}
 				}
+			}
+			//Добавим изображение
+			imageUrl := r.FormValue("imageUrl")
+			//Если url-адрес не пуст:
+			if imageUrl != "" {
+				imageUUID := uuid.New()
+				postsUUID := mux.Vars(r)["uuid"]
+				createdAt := time.Now()
+
+				//Проверим, было ли уже изображение:
+				imageRows, err := db.Query("SELECT imageurl FROM images WHERE postid = $1", postUUID)
+				if err != nil {
+					fmt.Printf("Ошибка поиска значений из бд! :( ")
+					panic(err)
+				}
+
+				//Если изображений ещё не было:
+				if !imageRows.Next() {
+					_, err = db.Exec("INSERT INTO images VALUES ($1, $2, $3, $4)",
+						imageUUID, postsUUID, imageUrl, createdAt)
+					if err != nil {
+						fmt.Printf("Ошибка сохранения данных в бд! ")
+						panic(err)
+					}
+				} else { //Если уже было изображение:
+					_, err = db.Exec("UPDATE images SET imageurl = $1 WHERE postid = $2", imageUrl, postUUID)
+					if err != nil {
+						fmt.Printf("Ошибка обновления данных в бд! ")
+						panic(err)
+					}
+				}
 
 			}
+
 			//Если запрос был без uuid, то есть такого поста ещё не существует,
 			//нам нужно создать его
 		} else {
