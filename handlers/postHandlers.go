@@ -1,6 +1,8 @@
 // posts
 package handlers
 
+///Обработчики post-запросов
+
 import (
 	"database/sql"
 	"fmt"
@@ -27,7 +29,7 @@ func LoginRequestHandler(w http.ResponseWriter, r *http.Request) {
 		if rec := recover(); rec != nil {
 			//Если ошибка, то выводим её на экран.
 			myerrors.Cur_error.ErrMsg = "Неверный логин или пароль! :("
-			http.Redirect(w, r, "/api/auth/getlogin", http.StatusSeeOther)
+			http.Redirect(w, r, "/api/auth/loginPage", http.StatusSeeOther)
 
 			fmt.Println("Перехвачено исключение:", r)
 		}
@@ -55,7 +57,7 @@ func LoginRequestHandler(w http.ResponseWriter, r *http.Request) {
 	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(enteredPassword))
 	if err != nil {
 		myerrors.Cur_error.ErrMsg = "Неверный пароль"
-		http.Redirect(w, r, "/api/auth/getlogin", http.StatusSeeOther)
+		http.Redirect(w, r, "/api/auth/loginPage", http.StatusSeeOther)
 		return
 	}
 	//Генерируем токены и отправляем в бд
@@ -91,7 +93,7 @@ func RegisterRequestHandler(w http.ResponseWriter, r *http.Request) {
 		if rec := recover(); rec != nil {
 			//Если ошибка, то выводим её на экран.
 
-			http.Redirect(w, r, "/api/auth/getregister", http.StatusSeeOther)
+			http.Redirect(w, r, "/api/auth/registerPage", http.StatusSeeOther)
 
 			fmt.Println("Перехвачено исключение:", r)
 		}
@@ -124,14 +126,14 @@ func RegisterRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if count != 0 {
 		myerrors.Cur_error.ErrMsg = "Почта уже зарегистрирована"
-		http.Redirect(w, r, "/api/auth/getregister", http.StatusSeeOther)
+		http.Redirect(w, r, "/api/auth/registerPage", http.StatusSeeOther)
 		return
 	}
 
 	//Проверка, что пароль содержит символы
 	if len(strings.TrimSpace(password)) == 0 {
 		myerrors.Cur_error.ErrMsg = "Пароль должен содержать хотя бы 1 символ"
-		http.Redirect(w, r, "/api/auth/getregister", http.StatusSeeOther)
+		http.Redirect(w, r, "/api/auth/registerPage", http.StatusSeeOther)
 		return
 	}
 

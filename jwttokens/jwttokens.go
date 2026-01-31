@@ -14,22 +14,24 @@ import (
 
 var secretKey = []byte("mmy_sseccrrett_kkeyy")
 
+// Генерирует access-токен
 func GenerateAccessToken(userId uuid.UUID) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userId,
 		"exp":     time.Now().Add(time.Hour * 2).Unix(),
-		//24 часа - срок годности
+		//2 часа - срок годности
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(secretKey)
 }
 
+// Генерирует refresh-токен
 func GenerateRefreshToken(userId uuid.UUID) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userId,
 		"exp":     time.Now().Add(time.Hour * 24 * 7).Unix(),
-		//24 часа - срок годности
+		//Неделя - срок годности
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -43,6 +45,9 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 		})
 }
 
+// MiddleWare, который активирует переданный обработчик, если
+// токены валидны. Токены берутся из данных пользователя в бд, а
+// к данным пользователя мы получаем доступ через uuid в models/users/AuthMap[AuthKey]
 func CheckTokenMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//Наш пользователь
@@ -87,14 +92,14 @@ func CheckTokenMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 				//Отправляем новый токен в бд, вызываем next(w, r)
 				db, err := sql.Open("postgres", databases.ConnStr)
 				if err != nil {
-					fmt.Printf("Ошибка подключения бд :( ")
+					fmt.Printf("Ошибка: jwttokens/jwttokens.go/CheckTokenMiddleWare - 1")
 					panic(err)
 				}
 				defer db.Close()
 
 				_, err = db.Exec("UPDATE users SET accesstoken = $1 WHERE userid = $2", new_access_token, cur_user.UserUUID)
 				if err != nil {
-					fmt.Printf("Ошибка в отправке токенов в бд :( ")
+					fmt.Printf("Ошибка: jwttokens/jwttokens.go/CheckTokenMiddleWare - 2")
 					panic(err)
 				}
 

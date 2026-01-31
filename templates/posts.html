@@ -25,12 +25,12 @@
                <a class="nav-link fw-bold py-1 px-0" aria-current="page" href="/api">Главная</a>
                <a class="nav-link fw-bold py-1 px-0 active" href="#">Посты</a>
                {{ if .Email}}
-               <a class="nav-link fw-bold py-1 px-0" href="/api/auth/exit-from-posts">Выйти</a>
+               <a class="nav-link fw-bold py-1 px-0" href="/api/posts/exitFromPosts">Выйти</a>
                {{ end }}
                {{ if .Email }}
                <p class="py-1 px-0" style="margin-left: 13px;">{{ .Email }}</p>
                {{ else }}
-               <a class="nav-link fw-bold py-1 px-0" href="/api/auth/getlogin">Зарег/Войти</a>
+               <a class="nav-link fw-bold py-1 px-0" href="/api/auth/loginPage">Зарег/Войти</a>
                {{ end }}
             </nav>
          </div>
@@ -45,7 +45,7 @@
             авторизоваться!!! (Это займёт менее 15 секунд)
          </p>
          <p class="lead">
-            <a href="/api/auth/getlogin" class="btn btn-lg btn-light fw-bold border-white bg-white"
+            <a href="/api/auth/loginPage" class="btn btn-lg btn-light fw-bold border-white bg-white"
                style="width: 120px; white-space: nowrap;">Войти</a>
          </p>
       </main>

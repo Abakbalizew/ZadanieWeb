@@ -40,12 +40,12 @@
                <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="/api">Главная</a>
                <a class="nav-link fw-bold py-1 px-0" href="/api/posts">Посты</a>
                {{ if .Email}}
-               <a class="nav-link fw-bold py-1 px-0" href="/api/auth/exit">Выйти</a>
+               <a class="nav-link fw-bold py-1 px-0" href="/api/posts/exitFromMainPage">Выйти</a>
                {{ end }}
                {{ if .Email }}
                <p class="py-1 px-0" style="margin-left: 13px;">{{ .Email }}</p>
                {{ else }}
-               <a class="nav-link fw-bold py-1 px-0" href="/api/auth/getlogin">Зарег/Войти</a>
+               <a class="nav-link fw-bold py-1 px-0" href="/api/auth/loginPage">Зарег/Войти</a>
                {{ end }}
             </nav>
          </div>
@@ -77,7 +77,7 @@
             <a href="/api/posts" class="btn btn-lg btn-light fw-bold border-white bg-white"
                style="width: 120px; white-space: nowrap;">К постам</a>
             {{ else }}
-            <a href="/api/auth/getlogin" class="btn btn-lg btn-light fw-bold border-white bg-white"
+            <a href="/api/auth/loginPage" class="btn btn-lg btn-light fw-bold border-white bg-white"
                style="width: 120px; white-space: nowrap;">Войти</a>
             {{ end }}
          </p>

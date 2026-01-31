@@ -1,8 +1,6 @@
 package handlers
 
-//
-//
-//
+///Обработчики get-запросов
 
 import (
 	"database/sql"
@@ -228,7 +226,7 @@ func ExitFromMainPageHandler(w http.ResponseWriter, r *http.Request) {
 func ExitFromPostsHandler(w http.ResponseWriter, r *http.Request) {
 	models.AuthMap[models.AuthKey] = ""
 
-	http.Redirect(w, r, "/api/posts", http.StatusOK)
+	http.Redirect(w, r, "/api/posts", http.StatusSeeOther)
 }
 
 // PostEditHandler Редактирование поста

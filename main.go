@@ -39,9 +39,9 @@ func main() {
 	rtr.HandleFunc("/api/auth/loginPage", handlers.LoginPageHandler).Methods("GET")
 	//Страница регистрации
 	rtr.HandleFunc("/api/auth/registerPage", handlers.RegisterPageHandler).Methods("GET")
-	//Выход из аккаунта
+	//Выход из аккаунта с главной страницы (нас вернёт на главную страницу)
 	rtr.HandleFunc("/api/posts/exitFromMainPage", handlers.ExitFromMainPageHandler).Methods("GET")
-	//Выход из аккаунта со страницы постов
+	//Выход из аккаунта со страницы постов (нас вернёт на страницу постов)
 	rtr.HandleFunc("/api/posts/exitFromPosts", handlers.ExitFromPostsHandler).Methods("GET")
 
 	//Посты

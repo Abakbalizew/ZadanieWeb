@@ -1,11 +1,14 @@
 package models
 
+///Модель поста
+
 import (
 	"time"
 
 	"github.com/google/uuid"
 )
 
+// Модель поста
 type Post struct {
 	PostUUID       uuid.UUID
 	AuthorUUID     uuid.UUID
@@ -20,7 +23,7 @@ type Post struct {
 	LastEditedAt time.Time
 	Status       string //="Published" || ="Draft"
 	//url-адрес картинки
-	ImageUrl string
+	ImageUrl    string
 	AuthorEmail string
 }
 
